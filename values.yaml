@@ -1,0 +1,113 @@
+# General application settings
+app:
+  name: auto-scale-app
+  namespace: default
+  image:
+    repository: my-docker-repo/auto-scale-app
+    tag: latest
+    pullPolicy: IfNotPresent
+  port: 8080
+  metricsPath: /metrics
+
+# Deployment settings
+deployment:
+  replicas: 2
+  annotations: {}
+  labels: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Service settings
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+  annotations: {}
+  labels: {}
+
+# Prometheus settings
+prometheus:
+  enabled: true
+  existingPrometheusService: ""  # Use an existing Prometheus service if not deploying Prometheus.
+  scrapeInterval: 15s
+  scrapeConfigs: []  # Additional scrape configs for Prometheus.
+
+# Prometheus Adapter settings
+prometheusAdapter:
+  enabled: true
+  image: quay.io/prometheus/adapter:v0.9.1  # Adapter image
+  annotations: {}
+  labels: {}
+
+# HPA settings
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80  # Scale if CPU usage > 80%.
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 70  # Scale if memory usage > 70%.
+    - type: External
+      external:
+        metricName: requests_per_second
+        target:
+          type: Value
+          value: 100  # Scale if requests_per_second > 100.
+
+# RBAC settings
+rbac:
+  enabled: true
+
+# Health checks
+healthChecks:
+  enabled: true
+  prometheus:
+    path: /-/healthy
+    port: 9090
+    liveness:
+      enabled: true
+      initialDelaySeconds: 30
+      timeoutSeconds: 5
+    readiness:
+      enabled: true
+      initialDelaySeconds: 10
+      timeoutSeconds: 5
+
+  prometheusAdapter:
+    path: /metrics
+    port: 6443
+    liveness:
+      enabled: true
+      initialDelaySeconds: 30
+      timeoutSeconds: 5
+    readiness:
+      enabled: true
+      initialDelaySeconds: 10
+      timeoutSeconds: 5
+
+  app:
+    liveness:
+      enabled: true
+      path: /metrics
+      initialDelaySeconds: 10
+      timeoutSeconds: 5
+    readiness:
+      enabled: true
+      path: /metrics
+      initialDelaySeconds: 5
+      timeoutSeconds: 3

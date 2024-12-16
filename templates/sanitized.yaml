@@ -1,0 +1,111 @@
+# Health Check for Prometheus
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-health
+  namespace: 
+  labels:
+    app: prometheus
+    
+spec:
+  selector:
+    app: prometheus
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-health
+  namespace: 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+      - name: prometheus
+        image: prom/prometheus:latest
+        livenessProbe:
+          httpGet:
+            path: /-/healthy
+            port: 9090
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /-/ready
+            port: 9090
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+---
+# Health Check for Prometheus Adapter
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-adapter-health
+  namespace: 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus-adapter
+  template:
+    metadata:
+      labels:
+        app: prometheus-adapter
+    spec:
+      containers:
+      - name: prometheus-adapter
+        image: quay.io/prometheus/adapter:v0.9.1
+        livenessProbe:
+          httpGet:
+            path: /metrics
+            port: 6443
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /metrics
+            port: 6443
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+---
+# Health Check for Application
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: -health
+  namespace: 
+spec:
+  replicas: 
+  selector:
+    matchLabels:
+      app: 
+  template:
+    metadata:
+      labels:
+        app: 
+    spec:
+      containers:
+      - name: 
+        image: ":"
+        livenessProbe:
+          httpGet:
+            path: 
+            port: 
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: 
+            port: 
+          initialDelaySeconds: 5
+          timeoutSeconds: 3

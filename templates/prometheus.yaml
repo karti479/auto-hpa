@@ -1,0 +1,54 @@
+{{- if .Values.prometheus.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: {{ .Values.app.namespace }}
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: {{ .Values.prometheus.scrapeInterval }}
+    scrape_configs:
+      - job_name: '{{ .Values.app.name }}'
+        static_configs:
+          - targets: ['{{ .Values.app.name }}:{{ .Values.app.port }}']
+      {{- range .Values.prometheus.scrapeConfigs }}
+      {{ . }}
+      {{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: {{ .Values.app.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+      - name: prometheus
+        image: prom/prometheus:latest
+        args:
+          - --config.file=/etc/prometheus/prometheus.yml
+        volumeMounts:
+          - name: config
+            mountPath: /etc/prometheus
+        livenessProbe:
+          httpGet:
+            path: /-/healthy
+            port: 9090
+        readinessProbe:
+          httpGet:
+            path: /-/ready
+            port: 9090
+      volumes:
+        - name: config
+          configMap:
+            name: prometheus-config
+{{- end }}

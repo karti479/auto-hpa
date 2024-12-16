@@ -1,0 +1,11 @@
+apiVersion: v2
+name: auto-scale-metrics
+description: Helm chart for application-aware horizontal pod autoscaling
+version: 1.1.0
+dependencies:
+  - name: prometheus
+    repository: https://prometheus-community.github.io/helm-charts
+    version: 21.0.0
+  - name: prometheus-adapter
+    repository: https://prometheus-community.github.io/helm-charts
+    version: 2.0.0
