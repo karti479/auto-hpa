@@ -1,0 +1,161 @@
+
+
+# Project Information
+site_name:  🚀 Auto-HPA  🚀
+site_description: A comprehensive guide for the Auto-Scale Metrics Helm Chart.
+site_author: Kartik Singh
+site_url: https://www.linkedin.com/in/auto-hpa-metric/
+
+# Theme with Custom Colors
+theme:
+  name: material
+  language: en
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: pink
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: lime
+      toggle:
+        icon: material/lightbulb
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - toc.integrate
+    - content.code.copy
+
+# Extra Content
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/karti479/auto-hpa.git
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/product-kartik/
+    - icon: fontawesome/solid/envelope
+      link: mailto:your-karti479@gmail.com
+    - icon: fontawesome/solid/phone
+      link: tel:+91-8742983860
+  contact:
+    email: your-email@example.com
+    phone: +91-8742983860
+    github: https://github.com/karti479/auto-hpa.git
+    linkedin: https://www.linkedin.com/in/product-kartik/
+
+# Custom Content for Top Header
+extra_javascript:
+  - https://kit.fontawesome.com/a076d05399.js  # FontAwesome icons for extra styling
+
+# Navigation
+nav:
+  - ⚙️ About Product : About.md
+  - 🌐 Home! Lets Start : index.md
+  - 🛠️ Installation Guide: installation.md
+  - 🧩 Configuration Guide: configuration.md
+  - 🌟 Troubleshooting Guide: troubleshooting.md
+
+
+# Plugins
+plugins:
+  - search
+
+# Markdown Extensions
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - attr_list
+  - md_in_html
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+
+
+# extra:
+#   social:
+#     - icon: fontawesome/brands/github
+#       link: https://github.com/karti479/auto-hpa.git
+#     - icon: fontawesome/brands/linkedin
+#       link: https://www.linkedin.com/in/product-kartik/
+#   generator: true
+# # Project Information
+# site_name: Auto-HPA Metrics Documentation
+# site_description: A comprehensive guide for the Auto-Scale Metrics Helm Chart.
+# site_author: Kartik Singh
+# site_url: https://github.com/karti479/auto-hpa.git
+
+# # Theme
+# theme:
+#   name: material
+#   language: en
+#   palette:
+#     - scheme: default
+#       primary: indigo
+#       accent: purple
+#       toggle:
+#         icon: material/lightbulb-outline
+#         name: Switch to dark mode
+#     - scheme: slate
+#       primary: indigo
+#       accent: teal
+#       toggle:
+#         icon: material/lightbulb
+#         name: Switch to light mode
+#   features:
+#     - navigation.tabs
+#     - navigation.sections
+#     - navigation.expand
+#     - navigation.top
+#     - search.suggest
+#     - search.highlight
+#     - toc.integrate
+#     - content.code.copy
+
+# # Navigation
+# nav:
+#   - Home: index.md
+#   - Installation Guide: installation.md
+#   - Configuration Guide: configuration.md
+#   - Troubleshooting Guide: troubleshooting.md
+
+# # Plugins
+# plugins:
+#   - search
+
+# # Markdown Extensions
+# markdown_extensions:
+#   - admonition
+#   - codehilite
+#   - footnotes
+#   - attr_list
+#   - md_in_html
+#   - pymdownx.superfences
+#   - pymdownx.details
+#   - pymdownx.highlight:
+#       anchor_linenums: true
+#   - pymdownx.inlinehilite
+#   - pymdownx.tabbed:
+#       alternate_style: true
+#   - pymdownx.snippets
+#   - toc:
+#       permalink: true
+
+# # Extra Features
+# extra:
+#   social:
+#     - icon: fontawesome/brands/github
+#       link: https://github.com/karti479/auto-hpa.git
+#     - icon: fontawesome/brands/linkedin
+#       link: https://www.linkedin.com/in/product-kartik/
+#   generator: true
