@@ -1,8 +1,8 @@
 # Site Settings
 title: "Auto-Scale Metrics Documentation"
 description: "A comprehensive guide for Auto-Scale Metrics Helm Chart"
-url: "https://<your-github-username>.github.io" # Replace with your GitHub username URL
-baseurl: "/<repository-name>" # Replace with your repository name
+url: "https://karti479.github.io" # Replace with your GitHub username URL
+baseurl: "https://github.com/karti479/auto-hpa" # Replace with your repository name
 
 # Theme Configuration
 remote_theme: mmistakes/minimal-mistakes@4.24.0
