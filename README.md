@@ -16,7 +16,7 @@
 13. [Conclusion](#conclusion)
 14. [Extended User Guide](#extended-user-guide)
 
-## Overview
+## 1. Overview
 
 The Auto-Scale Metrics Helm Chart provides a production-grade solution for scaling Kubernetes workloads dynamically using:
 - Kubernetes HPA (Horizontal Pod Autoscaler)
@@ -30,7 +30,7 @@ It supports scaling based on:
 
 The chart is highly configurable and integrates modularly with existing Prometheus setups.
 
-## Features
+## 2. Features
 
 | Feature | Description |
 |---------|-------------|
@@ -42,38 +42,38 @@ The chart is highly configurable and integrates modularly with existing Promethe
 | Production-Ready | Namespace isolation, robust health checks, and resource configurations. |
 | Scalable | Supports multi-metric scaling and advanced configurations. |
 
-## Architecture and Components
+## 3. Architecture and Components
 
 The Helm chart consists of the following key components:
 
-### Application Deployment
+### 3.1 Application Deployment
 - Deploys the user application
 - Exposes a /metrics endpoint compatible with Prometheus
 
-### Prometheus
+### 3.2 Prometheus
 - Scrapes metrics from the /metrics endpoint
 - Provides a centralized metrics store for Kubernetes HPA
 
-### Prometheus Adapter
+### 3.3 Prometheus Adapter
 - Translates Prometheus metrics into Kubernetes Custom Metrics API
 - Enables Kubernetes HPA to use custom metrics for scaling
 
-### HPA (Horizontal Pod Autoscaler)
+### 3.4 HPA (Horizontal Pod Autoscaler)
 - Queries Kubernetes Metrics API to scale pods dynamically
 
-## Installation Guide
+## 4. Installation Guide
 
-### Prerequisites
+### 4.1 Prerequisites
 Ensure the following are available:
 1. Kubernetes Cluster (v1.24+)
 2. Helm (v3+)
 3. Prometheus-compatible Application exposing metrics at /metrics
 
-### Steps for Installation
+### 4.2 Steps for Installation
 
 Step 1: Clone the Helm Chart Repository
 ```bash
-git clone <repo-url>
+git clone https://github.com/your-org/auto-scale-metrics.git
 cd auto-scale-metrics
 ```
 
@@ -95,57 +95,22 @@ kubectl get all -n <namespace>
 kubectl get pods -n <namespace>
 ```
 
-## User Configuration Guide
+## 5. User Configuration Guide
 
-This section provides detailed instructions and examples for configuring the Helm chart via values.yaml. The guide covers all user needs and probable conditions for configuring the application, Prometheus, Prometheus Adapter, HPA, and health checks.
+This section provides detailed instructions and examples for configuring the Helm chart via values.yaml.
 
-### General Application Configuration
-
-This section defines the application's deployment details, including the image, ports, and namespace.
+### 5.1 General Application Configuration
 
 ```yaml
 app:
-  name: auto-scale-app             # Application name
-  namespace: default               # Kubernetes namespace
+  name: auto-scale-app
+  namespace: default
   image:
     repository: my-docker-repo/auto-scale-app
-    tag: latest                    # Image tag
-    pullPolicy: IfNotPresent       # Image pull policy
-  port: 8080                       # Application port
-  metricsPath: /metrics            # Path for metrics exposure
-```
-
-Probable Conditions:
-1. Custom Namespace:
-   - Modify namespace to isolate the application.
-   ```yaml
-   namespace: production
-   ```
-2. Using Private Docker Registry:
-   - Add image pull secrets.
-   ```yaml
-   image:
-     pullPolicy: Always
-     pullSecrets: 
-       - name: my-docker-secret
-   ```
-3. Non-Standard Metrics Path:
-   - Update metricsPath:
-   ```yaml
-   metricsPath: /custom-metrics
-   ```
-
-### Deployment Configuration
-
-Define how your application pods are deployed, including resource requests, limits, annotations, and replica settings.
-
-```yaml
-deployment:
-  replicas: 2                      # Number of pod replicas
-  annotations:
-    "app.kubernetes.io/version": "1.0"
-  labels:
-    environment: production
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+  port: 8080
+  metricsPath: /metrics
   resources:
     requests:
       cpu: 100m
@@ -155,142 +120,36 @@ deployment:
       memory: 512Mi
 ```
 
-Probable Conditions:
-1. Custom Resource Requests and Limits:
-   - Ensure HPA works correctly by defining resource requests.
-   ```yaml
-   resources:
-     requests:
-       cpu: 200m
-       memory: 256Mi
-     limits:
-       cpu: 1
-       memory: 1Gi
-   ```
-2. Scaling to Zero:
-   - Set replicas to 0 for low-traffic times.
-   ```yaml
-   replicas: 0
-   ```
-3. Add Custom Annotations:
-   - Include annotations for monitoring or service meshes.
-   ```yaml
-   annotations:
-     sidecar.istio.io/inject: "true"
-   ```
-
-### Service Configuration
-
-Configure how the application service is exposed to Prometheus or other consumers.
-
-```yaml
-service:
-  type: ClusterIP                  # Service type: ClusterIP, NodePort, LoadBalancer
-  port: 80                         # Service port
-  targetPort: 8080                 # Application port
-  annotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/port: "8080"
-  labels:
-    environment: production
-```
-
-Probable Conditions:
-1. Expose Service via LoadBalancer:
-   ```yaml
-   service:
-     type: LoadBalancer
-   ```
-2. Custom Service Annotations:
-   - Add annotations to allow Prometheus scraping or ingress routing.
-   ```yaml
-   annotations:
-     prometheus.io/scrape: "true"
-     prometheus.io/path: "/metrics"
-   ```
-3. NodePort Configuration:
-   - Expose the service on a specific NodePort.
-   ```yaml
-   service:
-     type: NodePort
-     nodePort: 30080
-   ```
-
-### Prometheus Configuration
-
-Prometheus is responsible for scraping metrics and integrating with the adapter.
+### 5.2 Prometheus Configuration
 
 ```yaml
 prometheus:
-  enabled: true                     # Deploy Prometheus
-  scrapeInterval: 15s               # Scrape interval for metrics
-  existingPrometheusService: ""     # Use existing Prometheus service if set
-  scrapeConfigs:                    # Additional scrape jobs
-    - job_name: 'custom-job'
+  enabled: true
+  scrapeInterval: 15s
+  scrapeConfigs:
+    - job_name: 'auto-scale-app'
       static_configs:
-        - targets: ['custom-app:9090']
+        - targets: ['auto-scale-app:8080']
 ```
 
-Probable Conditions:
-1. Use an Existing Prometheus:
-   ```yaml
-   enabled: false
-   existingPrometheusService: "prometheus-service"
-   ```
-2. Multiple Scrape Jobs:
-   - Add additional configurations for multiple targets:
-   ```yaml
-   scrapeConfigs:
-     - job_name: 'app-metrics'
-       static_configs:
-         - targets: ['auto-scale-app:8080']
-     - job_name: 'queue-metrics'
-       static_configs:
-         - targets: ['queue-service:9090']
-   ```
-3. Custom Scrape Interval:
-   - Change the scrape interval for more frequent monitoring:
-   ```yaml
-   scrapeInterval: 10s
-   ```
-
-### Prometheus Adapter Configuration
-
-Prometheus Adapter translates Prometheus metrics into Kubernetes Custom Metrics API.
+### 5.3 Prometheus Adapter Configuration
 
 ```yaml
 prometheusAdapter:
   enabled: true
-  image: quay.io/prometheus/adapter:v0.9.1
-  annotations: {}
-  labels: {}
-  resources:
-    requests:
-      cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: 500m
-      memory: 512Mi
+  rules:
+    - seriesQuery: 'http_requests_total{namespace!="",pod!=""}'
+      resources:
+        overrides:
+          namespace: {resource: "namespace"}
+          pod: {resource: "pod"}
+      name:
+        matches: "^(.*)_total"
+        as: "${1}_per_second"
+      metricsQuery: 'rate(<<.Series>>{<<.LabelMatchers>>}[2m])'
 ```
 
-Probable Conditions:
-1. Custom Adapter Image:
-   - Use a specific version or custom-built image:
-   ```yaml
-   image: quay.io/custom/adapter:v1.0.0
-   ```
-2. Custom Adapter Resources:
-   - Set appropriate limits for high-performance needs.
-   ```yaml
-   resources:
-     requests:
-       cpu: 200m
-       memory: 256Mi
-   ```
-
-### HPA Configuration
-
-Configure Horizontal Pod Autoscaler to scale based on CPU, memory, or external metrics.
+### 5.4 HPA Configuration
 
 ```yaml
 hpa:
@@ -304,210 +163,120 @@ hpa:
         target:
           type: Utilization
           averageUtilization: 80
-    - type: External
-      external:
-        metricName: requests_per_second
+    - type: Pods
+      pods:
+        metric:
+          name: http_requests_per_second
         target:
-          type: Value
-          value: 100
+          type: AverageValue
+          averageValue: 10
 ```
 
-Probable Conditions:
-1. Scaling Based on Custom Metrics:
-   ```yaml
-   - type: External
-     external:
-       metricName: latency_p99
-       target:
-         type: Value
-         value: 300
-   ```
-2. Disable HPA:
-   - Prevent HPA from managing pods:
-   ```yaml
-   enabled: false
-   ```
-3. Multiple Scaling Metrics:
-   - Combine CPU, memory, and external metrics:
-   ```yaml
-   metrics:
-     - type: Resource
-       resource:
-         name: cpu
-         target:
-           type: Utilization
-           averageUtilization: 70
-     - type: External
-       external:
-         metricName: queue_length
-         target:
-           type: Value
-           value: 50
-   ```
+## 6. Metrics Scraping and Handling
 
-### Health Checks
+### 6.1 Metrics Exposure
 
-Health checks ensure that Prometheus, Prometheus Adapter, and the application are functioning correctly.
+Python Example:
+
+```python
+from prometheus_client import start_http_server, Counter
+import time
+
+REQUESTS = Counter('http_requests_total', 'Total HTTP Requests')
+
+def process_request():
+    REQUESTS.inc()
+
+if __name__ == '__main__':
+    start_http_server(8000)
+    while True:
+        process_request()
+        time.sleep(1)
+```
+
+Node.js Example:
+
+```javascript
+const express = require('express');
+const promClient = require('prom-client');
+
+const app = express();
+const collectDefaultMetrics = promClient.collectDefaultMetrics;
+collectDefaultMetrics({ timeout: 5000 });
+
+const httpRequestsTotal = new promClient.Counter({
+    name: 'http_requests_total',
+    help: 'Total number of HTTP requests'
+});
+
+app.get('/', (req, res) => {
+    httpRequestsTotal.inc();
+    res.send('Hello World!');
+});
+
+app.get('/metrics', async (req, res) => {
+    res.set('Content-Type', promClient.register.contentType);
+    res.end(await promClient.register.metrics());
+});
+
+app.listen(8080, () => console.log('Server running on port 8080'));
+```
+
+## 7. Health Monitoring
 
 ```yaml
 healthChecks:
   prometheus:
     liveness:
-      path: /-/healthy
-      port: 9090
+      httpGet:
+        path: /-/healthy
+        port: 9090
     readiness:
-      path: /-/ready
-      port: 9090
-
+      httpGet:
+        path: /-/ready
+        port: 9090
   prometheusAdapter:
     liveness:
-      path: /metrics
-      port: 6443
+      httpGet:
+        path: /healthz
+        port: 6443
     readiness:
-      path: /metrics
-      port: 6443
-
+      httpGet:
+        path: /healthz
+        port: 6443
   app:
     liveness:
-      path: /metrics
+      httpGet:
+        path: /healthz
+        port: 8080
       initialDelaySeconds: 10
-      timeoutSeconds: 5
+      periodSeconds: 5
     readiness:
-      path: /metrics
+      httpGet:
+        path: /ready
+        port: 8080
       initialDelaySeconds: 5
-      timeoutSeconds: 3
+      periodSeconds: 10
 ```
 
-Probable Conditions:
-1. Adjust Probe Timing:
-   - Increase initialDelaySeconds for slow-starting applications.
-   ```yaml
-   initialDelaySeconds: 30
-   ```
-2. Disable Health Checks:
-   - Temporarily disable health checks for debugging.
-   ```yaml
-   enabled: false
-   ```
+## 8. Product Workflow
 
-## Metrics Scraping and Handling
+1. Application exposes metrics
+2. Prometheus scrapes metrics
+3. Prometheus Adapter translates metrics
+4. HPA queries Custom Metrics API
+5. HPA makes scaling decisions
+6. Kubernetes scales the deployment
 
-### Metrics Exposure
+## 9. Use Cases
 
-The application must expose metrics in a Prometheus-compatible format at the /metrics endpoint.
+### 9.1 CPU and Memory Scaling
 
-Example Metrics Exposure:
-
-- Python Example:
-
-```python
-from prometheus_client import start_http_server, Counter
-
-REQUESTS = Counter('requests_total', 'Total number of requests')
-
-def handle_request():
-    REQUESTS.inc()
-
-if __name__ == "__main__":
-    start_http_server(8080)
-    while True:
-        handle_request()
-```
-
-- Node.js Example:
-
-```javascript
-const express = require('express');
-const client = require('prom-client');
-
-const app = express();
-const counter = new client.Counter({ name: 'requests_total', help: 'Total requests' });
-
-app.get('/', (req, res) => {
-    counter.inc();
-    res.send('Hello, metrics!');
-});
-
-app.get('/metrics', async (req, res) => {
-    res.set('Content-Type', client.register.contentType);
-    res.end(await client.register.metrics());
-});
-
-app.listen(8080, () => console.log('Server on port 8080'));
-```
-
-### Prometheus Configuration for Metrics Scraping
-
-Prometheus scrapes the /metrics endpoint of your application at regular intervals.
-
-Sample Scrape Configuration in values.yaml:
-
-```yaml
-prometheus:
-  scrapeConfigs:
-    - job_name: 'auto-scale-app'
-      static_configs:
-        - targets: ['auto-scale-app:8080']
-```
-
-- job_name: The logical name for the scrape job.
-- targets: IP or service names of the applications exposing /metrics.
-
-### Prometheus Adapter Integration
-
-Prometheus Adapter makes custom metrics available to Kubernetes through the Custom Metrics API.
-
-Example Adapter Rule:
-
-```yaml
-rules:
-  - seriesQuery: 'http_requests_total{namespace!="",pod!=""}'
-    resources:
-      overrides:
-        namespace: {resource: "namespace"}
-        pod: {resource: "pod"}
-    name:
-      matches: "^(.*)_total"
-      as: "${1}"
-    metricsQuery: 'sum(rate(<<.Series>>[1m])) by (<<.GroupBy>>)'
-```
-
-- seriesQuery: Selects the Prometheus series.
-- metricsQuery: Aggregates metrics to a format readable by Kubernetes.
-
-## Product Workflow
-
-### Step-by-Step Flow
-
-1. Metrics Exposure:
-   - Application exposes metrics via an endpoint like /metrics.
-2. Metrics Collection:
-   - Prometheus scrapes the /metrics endpoint based on the defined scrape configuration.
-3. Metrics Translation:
-   - Prometheus Adapter converts metrics from Prometheus into the Custom Metrics API format.
-4. Metrics Query by HPA:
-   - Kubernetes HPA queries the Custom Metrics API.
-   - Example API query:
-     ```bash
-     kubectl get --raw "/apis/custom.metrics.k8s.io/v1beta1/namespaces/default/pods/*/requests_total"
-     ```
-5. HPA Scaling Decision:
-   - Based on defined thresholds in values.yaml, HPA increases or decreases the pod replicas dynamically.
-6. Scaling Action:
-   - Kubernetes adjusts the deployment replicas to match the defined target values.
-
-## Use Cases
-
-Below are practical scenarios where the Auto-Scale Metrics Helm Chart can be applied:
-
-### CPU and Memory Scaling
-
-Scenario:
-A web application experiences spikes in CPU and memory usage during peak hours.
-
-Configuration:
 ```yaml
 hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
   metrics:
     - type: Resource
       resource:
@@ -520,4 +289,187 @@ hpa:
         name: memory
         target:
           type: Utilization
-          averageUtilization: 70
+          averageUtilization: 80
+```
+
+### 9.2 Scaling Based on Requests Per Second
+
+```yaml
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 20
+  metrics:
+    - type: Pods
+      pods:
+        metric:
+          name: http_requests_per_second
+        target:
+          type: AverageValue
+          averageValue: 50
+```
+
+### 9.3 Scaling Based on Queue Length
+
+```yaml
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    - type: External
+      external:
+        metric:
+          name: queue_messages_ready
+          selector:
+            matchLabels:
+              queue: "worker-jobs"
+        target:
+          type: AverageValue
+          averageValue: 30
+```
+
+## 10. Troubleshooting Guide
+
+### 10.1 HPA Not Scaling
+
+1. Check HPA status:
+   ```bash
+   kubectl describe hpa <hpa-name> -n <namespace>
+   ```
+
+2. Verify metrics:
+   ```bash
+   kubectl get --raw "/apis/custom.metrics.k8s.io/v1beta1/namespaces/default/pods/*/http_requests_per_second" | jq .
+   ```
+
+3. Check Prometheus Adapter logs:
+   ```bash
+   kubectl logs -l app=prometheus-adapter -n <namespace>
+   ```
+
+### 10.2 Prometheus Not Scraping Metrics
+
+1. Check Prometheus targets:
+   ```bash
+   kubectl port-forward svc/prometheus 9090:9090 -n <namespace>
+   ```
+   Then visit http://localhost:9090/targets
+
+2. Verify scrape config:
+   ```bash
+   kubectl get configmap prometheus-server -n <namespace> -o yaml
+   ```
+
+### 10.3 Application Not Exposing Metrics
+
+1. Check if metrics endpoint is accessible:
+   ```bash
+   kubectl port-forward svc/<app-service> 8080:8080 -n <namespace>
+   curl http://localhost:8080/metrics
+   ```
+
+2. Verify application logs:
+   ```bash
+   kubectl logs <pod-name> -n <namespace>
+   ```
+
+## 11. Pricing and Licensing
+
+- Free Usage: Helm chart available for free.
+- Annual Support Licensing: ₹1,000 INR/year.
+  - Includes email support and regular updates.
+
+## 12. Best Practices
+
+1. Set appropriate resource requests and limits for all components.
+2. Use namespaces to isolate the auto-scaling setup.
+3. Regularly update the Helm chart and its dependencies.
+4. Monitor and alert on the health of Prometheus and Prometheus Adapter.
+5. Test scaling behavior in a non-production environment before deploying to production.
+
+## 13. Conclusion
+
+The Auto-Scale Metrics Helm Chart provides a robust, flexible solution for implementing custom metrics-based autoscaling in Kubernetes environments. By leveraging Prometheus and the Prometheus Adapter, it enables fine-grained control over scaling decisions based on application-specific metrics.
+
+## 14. Extended User Guide
+
+### 14.1 Advanced Prometheus Adapter Configuration
+
+```yaml
+prometheusAdapter:
+  rules:
+    - seriesQuery: '{__name__=~"^container_.*",container!="POD",namespace!="",pod!=""}'
+      seriesFilters: []
+      resources:
+        overrides:
+          namespace:
+            resource: namespace
+          pod:
+            resource: pod
+      name:
+        matches: ^container_(.*)_seconds_total$
+        as: "${1}_per_second"
+      metricsQuery: sum(rate(<<.Series>>{<<.LabelMatchers>>}[1m])) by (<<.GroupBy>>)
+```
+
+### 14.2 Implementing Custom Metrics
+
+1. Define the metric in your application
+2. Expose the metric via the /metrics endpoint
+3. Configure Prometheus to scrape the metric
+4. Set up Prometheus Adapter rules to make the metric available to Kubernetes
+5. Configure HPA to use the custom metric
+
+Example workflow for a 'queue_depth' metric:
+
+1. Application code (Python):
+   ```python
+   from prometheus_client import Gauge
+   
+   QUEUE_DEPTH = Gauge('queue_depth', 'Number of items in the queue')
+   
+   def process_queue():
+       depth = get_queue_depth()  # Your queue depth logic here
+       QUEUE_DEPTH.set(depth)
+   ```
+
+2. Prometheus scrape config:
+   ```yaml
+   scrape_configs:
+     - job_name: 'queue-app'
+       static_configs:
+         - targets: ['queue-app:8080']
+   ```
+
+3. Prometheus Adapter rule:
+   ```yaml
+   rules:
+     - seriesQuery: 'queue_depth'
+       resources:
+         overrides:
+           namespace: {resource: "namespace"}
+           pod: {resource: "pod"}
+       name:
+         matches: "^(.*)$"
+         as: "${1}"
+       metricsQuery: 'avg(<<.Series>>{<<.LabelMatchers>>})'
+   ```
+
+4. HPA configuration:
+   ```yaml
+   hpa:
+     metrics:
+       - type: Pods
+         pods:
+           metric:
+             name: queue_depth
+           target:
+             type: AverageValue
+             averageValue: 100
+   ```
+
+This extended guide provides more in-depth examples and configurations to help users implement advanced autoscaling scenarios using the Auto-Scale Metrics Helm Chart.
+```
+
+This comprehensive documentation now includes complete use cases, commands, and code examples. It covers all aspects of the Auto-Scale Metrics Helm Chart, from installation to advanced configurations and troubleshooting. Let me know if you need any further clarification or additional information on any specific section.
