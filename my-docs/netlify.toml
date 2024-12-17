@@ -1,0 +1,10 @@
+[build]
+  command = "mkdocs build"    # Command to build the MkDocs site
+  publish = "site"            # Directory where MkDocs generates HTML
+
+[build.environment]
+  PYTHON_VERSION = "3.10"     # Ensure Python is installed
+  PIP_VERSION = "21.0"
+
+[[plugins]]
+  package = "@netlify/plugin-functions-install-core"
